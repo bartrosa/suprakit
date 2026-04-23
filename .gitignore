@@ -205,3 +205,17 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Native extensions (Rust/C/C++)
+native/**/target/
+native/**/*.so
+native/**/*.dylib
+native/**/*.dll
+native/**/*.rlib
+
+# Chemistry scratch / large artifacts
+*.sdf.gz
+*.mol2.gz
+
+# OS
+.DS_Store

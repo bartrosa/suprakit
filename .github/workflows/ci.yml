@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+
+      - name: Sync environment
+        env:
+          UV_PYTHON: ${{ matrix.python-version }}
+        run: |
+          uv python install ${{ matrix.python-version }}
+          make install
+
+      - name: Lint, typecheck, and test
+        run: make check
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
+
+  # macos-arm64-mps-smoke:
+  #   runs-on: macos-14
+  #   if: false  # TODO: enable when larger runners are acceptable for public CI.
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: astral-sh/setup-uv@v4
+  #       with:
+  #         enable-cache: true
+  #     - run: make install-mps
+  #     - run: make test

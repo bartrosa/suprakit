@@ -1,0 +1,30 @@
+site_name: suprakit
+site_description: Computational supramolecular chemistry toolkit
+repo_url: https://github.com/suprakit/suprakit
+
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - navigation.sections
+    - content.code.copy
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight
+  - pymdownx.superfences
+
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Performance: performance.md
+  - Contributing: contributing.md
+  - Modules:
+      - anionfit: modules/anionfit.md

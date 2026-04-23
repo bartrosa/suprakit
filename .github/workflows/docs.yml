@@ -1,0 +1,26 @@
+name: Docs
+
+on:
+  push:
+    branches: [main, master]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --group dev --extra chem --extra cpu
+
+      - name: Build docs
+        run: uv run mkdocs build --strict

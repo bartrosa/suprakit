@@ -1,0 +1,7 @@
+# PLACEHOLDER VALUES — NOT EXPERIMENTAL DATA — FOR SOFTWARE TESTING ONLY
+# logKa_THF is constructed as 10 * esp_au + 2.0 for exact linear consistency in unit tests.
+substituent,esp_au,logKa_THF
+Br,0.100000,3.000000
+CHO,0.150000,3.500000
+NO2,0.200000,4.000000
+CN,0.250000,4.500000
