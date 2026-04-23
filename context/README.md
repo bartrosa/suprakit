@@ -4,7 +4,7 @@ This directory tracks items that were scoped for bootstrap but deferred to keep 
 
 ## Open items
 
-- [TODO-anionfit-esp-implementation.md](TODO-anionfit-esp-implementation.md) — Full ESP-at-bowl-center extraction via tblite (deferred pending verified Python API usage).
+(none)
 
 ## How to close an item
 

@@ -12,9 +12,11 @@ import numpy as np
 import typer
 from rdkit import Chem
 
+from suprakit.anionfit.esp import compute_esp_at_bowl_center
 from suprakit.anionfit.predict import ESPLogKaModel
 from suprakit.anionfit.receptors import build_resorcin4arene
 from suprakit.anionfit.substituents import EWG_SMILES
+from suprakit.core.xtb import is_tblite_available
 
 app = typer.Typer(help="suprakit command-line interface.", add_completion=False)
 anionfit_app = typer.Typer(help="Anion-binding calibration workflows.")
@@ -68,7 +70,7 @@ def anionfit_predict(
     esp_au: float | None = typer.Option(
         None,
         "--esp-au",
-        help="Optional ESP value (atomic units). When omitted the CLI attempts tblite-backed ESP (currently deferred).",
+        help="Optional ESP value (atomic units). When omitted for substitution codes, suprakit runs GFN2-xTB if tblite is installed.",
     ),
     use_placeholder_table: bool = typer.Option(
         False,
@@ -88,8 +90,8 @@ def anionfit_predict(
             raise typer.BadParameter("Could not interpret query as valid SMILES.")
         if esp_value is None:
             typer.echo(
-                "SMILES input requires `--esp-au` until `anionfit` ESP evaluation is implemented "
-                "(see context/TODO-anionfit-esp-implementation.md).",
+                "SMILES input requires an explicit `--esp-au` value (automatic bowl ESP applies only "
+                "to built-in substitution-code receptors). See docs/modules/anionfit.md.",
                 err=True,
             )
             raise typer.Exit(code=2)
@@ -100,7 +102,7 @@ def anionfit_predict(
                 raise typer.BadParameter(f"Unknown substituent code {code!r}.")
 
         build_codes = codes
-        _ = build_resorcin4arene(build_codes)
+        receptor = build_resorcin4arene(build_codes)
 
         if esp_value is None:
             if use_placeholder_table and len(set(codes)) == 1:
@@ -111,11 +113,19 @@ def anionfit_predict(
                         "(not experimental data).",
                         err=True,
                     )
+            if esp_value is None and is_tblite_available():
+                typer.echo(
+                    "Computing ESP via GFN2-xTB (Mulliken probe; may take tens of seconds)...",
+                    err=True,
+                )
+                esp_value = float(
+                    compute_esp_at_bowl_center(receptor, solvent="thf", optimize=False).esp_au
+                )
             if esp_value is None:
                 typer.echo(
-                    "ESP is not available yet (tblite ESP extraction deferred). "
-                    "Provide `--esp-au`, or `--use-placeholder-table` with symmetric codes such as `4xNO2`, "
-                    "or consult context/TODO-anionfit-esp-implementation.md.",
+                    "ESP was not provided. Install tblite (`uv sync --extra xtb`), "
+                    "pass `--esp-au`, or use `--use-placeholder-table` with symmetric codes such as `4xNO2`. "
+                    "See docs/modules/anionfit.md.",
                     err=True,
                 )
                 raise typer.Exit(code=2)

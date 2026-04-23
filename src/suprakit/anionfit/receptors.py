@@ -13,6 +13,74 @@ _PARENT_CALIX_RESORCINARENE_SMILES = (
     "C1C2=CC(=C(C=C2O)O)CC3=CC(=C(C=C3O)O)CC4=C(C=C(C(=C4)CC5=C(C=C(C1=C5)O)O)O)O"
 )
 
+# Upper-rim aromatic CH situated between two oxygen substituents on each resorcinol ring (1,3 arrangement).
+UPPER_RIM_PRIMARY_SMARTS = "[c;H1]([c]O)[c]O"
+
+# Lower-rim attachment points across supported EWG fragments (ipso aromatic carbon).
+# Each entry is ``(SMARTS, ipso_atom_index)`` where ``ipso_atom_index`` selects the ipso carbon
+# within ``Mol.GetSubstructMatches(...)`` tuples.
+LOWER_RIM_IPSO_DEFINITIONS: tuple[tuple[str, int], ...] = (
+    ("[c][N+](=O)[O-]", 0),
+    ("[c][N+]([O-])=O", 0),
+    ("[c]C#N", 0),
+    ("[c]C=O", 0),
+    ("[c]C(F)(F)F", 0),
+    ("[c]S(=O)(=O)", 0),
+    ("[c]C(=O)C", 0),
+    ("[c]C(=O)N", 0),
+    ("[c][Br]", 0),
+    ("[c][Cl]", 0),
+    # Pentafluorophenyl: bowl-attached aromatic ipso is the second atom (after the bridge bond).
+    ("[c]-[c]1[c](F)[c](F)[c](F)[c](F)[c]1F", 1),
+)
+
+
+def upper_rim_atom_indices(mol: Chem.Mol) -> tuple[int, int, int, int]:
+    """Return the four upper-rim aromatic carbon indices (deterministic ordering).
+
+    The primary SMARTS encodes the resorcinol CH between two oxygen substituents. When lower-rim
+    substitution removes competing CH sites, exactly four aromatic CH sites remain for symmetric
+    tetra-substituted receptors and are selected via an explicit fallback.
+    """
+
+    primary = Chem.MolFromSmarts(UPPER_RIM_PRIMARY_SMARTS)
+    matches = mol.GetSubstructMatches(primary)
+    if len(matches) == 4:
+        return tuple(sorted(int(m[0]) for m in matches))
+
+    ch_pattern = Chem.MolFromSmarts("[cH1]")
+    aromatic_ch = sorted([int(m[0]) for m in mol.GetSubstructMatches(ch_pattern)])
+    if len(aromatic_ch) == 4:
+        return tuple(aromatic_ch)
+
+    smiles = Chem.MolToSmiles(mol)
+    raise ValueError(
+        "Could not identify exactly four upper-rim aromatic CH atoms for this receptor topology. "
+        f"matches(primary)={len(matches)} aromatic_CH={len(aromatic_ch)} SMILES={smiles}"
+    )
+
+
+def lower_rim_ipso_atom_indices(mol: Chem.Mol) -> tuple[int, int, int, int]:
+    """Return four lower-rim ipso aromatic carbons for supported substituent patterns."""
+
+    ipsos: set[int] = set()
+    for smarts, ipso_idx in LOWER_RIM_IPSO_DEFINITIONS:
+        q = Chem.MolFromSmarts(smarts)
+        if q is None:
+            raise RuntimeError(f"Internal SMARTS failed to parse: {smarts!r}")
+        for hit in mol.GetSubstructMatches(q):
+            ipsos.add(int(hit[ipso_idx]))
+
+    ordered = tuple(sorted(ipsos))
+    if len(ordered) != 4:
+        smiles = Chem.MolToSmiles(mol)
+        raise ValueError(
+            "Could not identify exactly four lower-rim ipso atoms for this receptor topology. "
+            f"found={len(ordered)} SMILES={smiles}"
+        )
+
+    return ordered
+
 
 def _embed_with_seed(mol: Chem.Mol, *, random_seed: int) -> Chem.Mol:
     mh = Chem.AddHs(mol)
@@ -161,4 +229,10 @@ def build_resorcin4arene(
     return current
 
 
-__all__ = ["build_resorcin4arene"]
+__all__ = [
+    "LOWER_RIM_IPSO_DEFINITIONS",
+    "UPPER_RIM_PRIMARY_SMARTS",
+    "build_resorcin4arene",
+    "lower_rim_ipso_atom_indices",
+    "upper_rim_atom_indices",
+]

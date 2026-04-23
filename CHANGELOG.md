@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- `anionfit.esp`: GFN2-xTB ESP at bowl probe via tblite, with point-charge approximation. Closes TODO-anionfit-esp-implementation.
+- `core.xtb.GFN2Backend`: swappable ESP backend abstraction.
+
 ## 0.1.0 — 2026-04-23
 
 ### Added
@@ -11,5 +18,4 @@
 
 ### Notes
 
-- `anionfit.esp` electrostatic evaluation remains deferred pending verified `tblite` Python APIs (see `context/TODO-anionfit-esp-implementation.md`).
 - Optional extras split **`chem`** (RDKit + ASE) vs **`xtb`** (`tblite`) to keep installs tractable across platforms.

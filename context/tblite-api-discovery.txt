@@ -1,0 +1,28 @@
+=== tblite version ===
+tblite import failed: No module named 'tblite'
+
+=== Local environment note ===
+This workspace uses `uv` without the `xtb` extra installed (tblite build failed on arm64 macOS during `uv sync --extra xtb`).
+CI on `ubuntu-latest` installs the published manylinux `tblite` wheel and should import successfully.
+
+=== Upstream documentation capture (tblite.readthedocs.io, ASE integration) ===
+Source: https://tblite.readthedocs.io/en/latest/users/ase.html (retrieved during task execution)
+
+Key facts used for implementation:
+- Import path: `from tblite.ase import TBLite`
+- Constructor supports keyword parameters including:
+  - `method` (default `"GFN2-xTB"`)
+  - `charge`, `solvation`, ...
+- Supported calculator properties include:
+  - `charges`: Mulliken charges (documented as being in units of `e`)
+  - `energy` / potential energy in `eV` via ASE (`atoms.get_potential_energy()`)
+  - forces, dipole, ...
+- Solvation is configured via `solvation=("alpb", "<solvent>")` (among other models such as `gbsa`, `cpcm`, ...).
+
+Explicit statement from docs about ESP-at-points:
+- The documented `implemented_properties` list for `tblite.ase.TBLite` includes `energy`, `forces`, `charges`, `dipole`, `stress` — **no dedicated molecular ESP evaluated on arbitrary 3D probe points**.
+
+Conclusion for this repository:
+- **Scenario B**: implement probe ESP via Mulliken point-charge potential:
+  \( \phi(\mathbf{r}) = \sum_i q_i / |\mathbf{r} - \mathbf{r}_i| \)
+  with positions in Bohr and \(q_i\) from `atoms.get_charges()`.
