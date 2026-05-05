@@ -1,0 +1,6 @@
+kind: molecule
+name: ethanol
+smiles: CCO
+formula: C2H6O
+charge: 0
+multiplicity: 1

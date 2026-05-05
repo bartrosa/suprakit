@@ -1,0 +1,22 @@
+kind: complex
+name: "18-crown-6 / K+ inclusion complex"
+components:
+  - molecule:
+      kind: molecule
+      name: "18-crown-6"
+      smiles: "C1COCCOCCOCCOCCOCCO1"
+    count: 1
+    role: host
+  - molecule:
+      kind: molecule
+      name: "potassium cation"
+      smiles: "[K+]"
+      charge: 1
+    count: 1
+    role: guest
+phase: gas
+total_charge: 1
+total_multiplicity: 1
+expected_geometry: "1:1 inclusion"
+non_covalent_hints:
+  - "ion-dipole: K+ ··· O"
