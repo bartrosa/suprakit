@@ -1,0 +1,39 @@
+kind: reaction_system
+name: "Michaelis-Menten"
+species:
+  - id: E
+    initial_concentration: 1.0e-6
+  - id: S
+    initial_concentration: 1.0e-3
+  - id: ES
+    initial_concentration: 0.0
+  - id: P
+    initial_concentration: 0.0
+reactions:
+  - id: r1
+    reactants:
+      - {species_id: E, coefficient: 1}
+      - {species_id: S, coefficient: 1}
+    products:
+      - {species_id: ES, coefficient: 1}
+    rate_law: "k1 * E * S"
+    parameters: {k1: 1.0e6}
+    reversible: false
+  - id: r2
+    reactants:
+      - {species_id: ES, coefficient: 1}
+    products:
+      - {species_id: E, coefficient: 1}
+      - {species_id: S, coefficient: 1}
+    rate_law: "k_1 * ES"
+    parameters: {k_1: 1.0e-3}
+    reversible: false
+  - id: r3
+    reactants:
+      - {species_id: ES, coefficient: 1}
+    products:
+      - {species_id: E, coefficient: 1}
+      - {species_id: P, coefficient: 1}
+    rate_law: "kcat * ES"
+    parameters: {kcat: 100.0}
+    reversible: false

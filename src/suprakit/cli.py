@@ -73,7 +73,7 @@ def anionfit_predict(
     use_placeholder_table: bool = typer.Option(
         False,
         "--use-placeholder-table/--no-placeholder-table",
-        help="Use bundled placeholder ESP values for supported symmetric 4×EWG codes (testing only).",
+        help="Use bundled placeholder ESP values for supported symmetric 4x EWG codes (testing only).",
     ),
 ) -> None:
     """Predict log(Ka) from ESP using the bundled linear calibration model."""

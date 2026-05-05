@@ -1,0 +1,24 @@
+kind: qc_job
+name: "xtb opt of 18-crown-6/K+"
+target:
+  kind: complex
+  name: "18-crown-6 / K+"
+  components:
+    - molecule:
+        kind: molecule
+        smiles: "C1COCCOCCOCCOCCOCCO1"
+      count: 1
+      role: host
+    - molecule:
+        kind: molecule
+        smiles: "[K+]"
+        charge: 1
+      count: 1
+      role: guest
+  total_charge: 1
+engine: xtb
+task: optimization
+method: "GFN2-xTB"
+solvent_model: "ALPB"
+solvent: water
+phase: solution

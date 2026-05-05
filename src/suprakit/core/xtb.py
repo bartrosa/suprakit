@@ -10,7 +10,7 @@ from typing import Any
 
 TBLITE_IMPORT_ERROR: Exception | None
 try:
-    import tblite  # noqa: F401
+    import tblite
 
     TBLITE_IMPORT_ERROR = None
 except Exception as exc:  # pragma: no cover - environment dependent

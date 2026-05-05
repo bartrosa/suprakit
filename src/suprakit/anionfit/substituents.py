@@ -42,7 +42,7 @@ def enumerate_patterns(
 
     Args:
         ewg_codes: Pool of substituent labels (must exist in ``EWG_SMILES``).
-        symmetric_only: If ``True``, only return uniform ``4×X`` combinations.
+        symmetric_only: If ``True``, only return uniform ``4x X`` (four identical) combinations.
 
     Returns:
         Distinct 4-tuples of substituent codes.
