@@ -1,118 +1,55 @@
 # suprakit
 
-Computational toolkit for supramolecular chemistry — cages, capsules, and macrocyclic hosts.
+**suprakit** is two things in one repository: a **long-term roadmap** from natural language to chemical/biological DSLs and quantum-chemistry inputs, and a **working toolkit today** for computational supramolecular chemistry—including **anionfit**, **xtb/tblite helpers**, geometry utilities, and a **CLI**.
 
-[![CI](https://img.shields.io/github/actions/workflow/status/suprakit/suprakit/ci.yml?branch=main&label=CI&logo=github)](https://github.com/suprakit/suprakit/actions/workflows/ci.yml)
-[![License](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
-[![Python](https://img.shields.io/badge/python-3.11--3.13-blue.svg)](pyproject.toml)
+## Status
 
-## What is this?
+Alpha · WIP (roadmap pre-alpha for NL→DSL; computational modules are farther along)
 
-suprakit is an Apache-2.0 Python toolkit for reproducible computational workflows around non-covalent assemblies: molecular cages/capsules, macrocyclic hosts, and calibrated binding descriptors.
+## Idea
 
-This repository starts from semi-empirical workflows (GFN2-xTB via tblite where available, RDKit cheminformatics, NumPy/SciPy numerics). The intent is to reproduce published computational protocols and iterate on hypotheses with open tools.
+Business-facing scenarios and executable checks stay aligned when teams share *examples* in a structured language—this is the familiar BDD story with Gherkin. **suprakit** applies the same separation of concerns to chemistry: stakeholders describe hosts, guests, and assemblies in natural language; the toolkit maps that intent onto DSLs such as SMILES or SBML and eventually onto QC input decks. Mixed-oracle workflows (rules, models, and calculators) sit behind stable interfaces so the science can evolve without rewriting the whole pipeline.
 
-## Install
+## What works today
 
-### CPU
+The repo already ships Python modules used in notebooks and tests:
+
+- **`suprakit.anionfit`** — ESP / binding-style workflows and bundled datasets (see `notebooks/`).
+- **`suprakit.core`** — geometry, I/O, parallelism, **tblite/xtb**-oriented helpers where optional deps are installed.
+- **`suprakit.cli`** — Typer-based CLI (`suprakit` entry point after install).
+
+Full docs for the computational stack live in **`docs/`** (MkDocs). Install **chem + xtb + cpu** extras for the same environment as `make install`.
+
+## Roadmap (NL → DSL → QC)
+
+- **PR 0** — Bootstrap repo (packaging, CI, quality stack, docs stubs) — **combined with existing computational code**.
+- **PR 1** — **SupraSpec** IR + protocols + ADRs.
+- **PR 2** — Multi-provider LLM abstraction.
+- **PR 3** — NL → SMILES.
+- **PR 4** — NL → SBML.
+- **PR 5** — QC pipeline (xtb + crest).
+- **PR 6** — CLI (extend/reconcile with current CLI).
+- **PR 7** — Evaluation harness.
+
+See [`docs/roadmap.md`](docs/roadmap.md).
+
+## Quick start
 
 ```bash
+git clone https://github.com/<your-org>/suprakit.git
+cd suprakit
 make install
+make check
 ```
 
-### Apple Silicon
+Use `make install-lite` if **tblite** fails to install on your platform (skips xtb extra; some tests may be skipped or fail—prefer full install on Linux x86_64 CI).
 
-```bash
-make install-mps
-```
-
-### CUDA
-
-```bash
-make install-cuda
-```
-
-Then:
-
-```bash
-make hooks
-```
-
-Notes:
-
-- **`chem`** installs RDKit + ASE; **`xtb`** installs tblite bindings. Linux x86_64 CI benefits from tblite wheels; arm64 macOS users may prefer `make install-lite` when tblite fails to build locally (see `docs/installation.md`).
-
-## Quick example
-
-```bash
-make cli ARGS='anionfit predict 4xNO2 --use-placeholder-table'
-```
-
-Equivalent Python snippet:
-
-```python
-import numpy as np
-from suprakit.anionfit.predict import ESPLogKaModel
-
-model = ESPLogKaModel.from_priyadarshini_2025()
-print(float(model.predict(np.array([0.20]))))
-```
-
-The bundled calibration CSV ships **explicit placeholders**, not experimental measurements.
-
-## Modules
-
-| Module | Status | Hardware |
-| --- | --- | --- |
-| `anionfit` | stable-ish (CPU workflows) | CPU (+ optional tblite/OpenMP) |
-| `ecdfast` | planned | CPU |
-| `cagelab` | planned | CPU / optional MPS / CUDA |
-| `mechanomol` | planned | CUDA recommended |
+Replace the clone URL with your fork or upstream repository.
 
 ## Development
 
-Common tasks:
-
-```bash
-make test
-make lint
-make typecheck
-make docs
-```
-
-Accelerator routing lives in `suprakit.core.device.detect_device`; see [`docs/performance.md`](docs/performance.md).
-
-Runtime overrides:
-
-```bash
-SUPRAKIT_DEVICE=cpu make test
-SUPRAKIT_DEVICE=mps make notebook
-```
-
-Commits follow Conventional Commits (see `docs/contributing.md`). Native acceleration policy lives in `native/README.md`.
-
-## Citing
-
-```bibtex
-@software{suprakit2026,
-  title        = {suprakit},
-  howpublished = {GitHub repository},
-  year         = {2026},
-}
-```
-
-If you rely on downstream tools (xtb ecosystem, RDKit, ASE), cite those works directly.
-
-## Acknowledgments
-
-This project builds on ecosystem tools including (non-exhaustive):
-
-- extended tight-binding models and implementations in the **xtb** ecosystem (doi:[10.1021/acs.jctc.8b00959](https://doi.org/10.1021/acs.jctc.8b00959))
-- **tblite** Python bindings wrapping GFN-xTB Hamiltonians (see upstream repository documentation)
-- **CREST** workflows for conformer / reaction exploration (doi:[10.1063/5.0197596](https://doi.org/10.1063/5.0197596))
-- **RDKit** cheminformatics (doi:[10.1021/ci050400p](https://doi.org/10.1021/ci050400p))
-- **ASE** structures and calculators (doi:[10.1088/1361-648X/ad1497](https://doi.org/10.1088/1361-648X/ad1497))
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for setup variants (`install`, `install-lite`, `install-mps`, …), conventions, and `make check`.
 
 ## License
 
-Apache-2.0 — see [`LICENSE`](LICENSE).
+Apache License 2.0 — see [`LICENSE`](LICENSE) and [`NOTICE`](NOTICE). (Roadmap/ADR docs follow the same repo license.)
