@@ -2,47 +2,51 @@ name: CI
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
   pull_request:
+    branches: [main]
 
 jobs:
-  test:
+  check:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12", "3.13"]
+        python-version: ["3.11", "3.12"]
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v3
         with:
           enable-cache: true
 
-      - name: Sync environment
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
+
+      - name: Install dependencies
         env:
           UV_PYTHON: ${{ matrix.python-version }}
-        run: |
-          uv python install ${{ matrix.python-version }}
-          make install
+        run: >-
+          uv sync --extra dev --extra chem --extra xtb --extra cpu
 
-      - name: Lint, typecheck, and test
-        run: make check
+      - name: Lint
+        env:
+          UV_PYTHON: ${{ matrix.python-version }}
+        run: uv run ruff check .
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          fail_ci_if_error: false
+      - name: Format check
+        env:
+          UV_PYTHON: ${{ matrix.python-version }}
+        run: uv run ruff format --check .
 
-  # macos-arm64-mps-smoke:
-  #   runs-on: macos-14
-  #   if: false  # TODO: enable when larger runners are acceptable for public CI.
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: astral-sh/setup-uv@v4
-  #       with:
-  #         enable-cache: true
-  #     - run: make install-mps
-  #     - run: make test
+      - name: Typecheck
+        env:
+          UV_PYTHON: ${{ matrix.python-version }}
+        run: uv run mypy
+
+      - name: Test
+        env:
+          UV_PYTHON: ${{ matrix.python-version }}
+        run: uv run pytest -q
